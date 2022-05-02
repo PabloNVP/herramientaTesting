@@ -1,0 +1,9 @@
+textarea {
+	overflow-y:scroll;
+	resize: none;
+}
+	/* .tab {position:sticky;left:250px;} */
+
+#id-drop-zone {
+	border: 5px solid blue;
+}
