@@ -1,9 +1,18 @@
-textarea {
+textarea 
+{
 	overflow-y:scroll;
 	resize: none;
 }
-	/* .tab {position:sticky;left:250px;} */
+/* .tab {position:sticky;left:250px;} */
+.res_div{
+	border: 3px solid green;
+	border-radius: 20%;
+}
 
 #id-drop-zone {
-	border: 5px solid blue;
+ 	 border: 5px solid orange;
+}
+
+.navbar{
+    background-color: orange;
 }
