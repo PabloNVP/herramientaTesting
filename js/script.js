@@ -5,19 +5,20 @@ class Metodo{
   fanIn = 0;
   fanOut= 0;
   codigoRaw = "";
+  codigoBlanco=0;
   constructor(nombre, lineas) {
       this.nombre = nombre;
       this.lineas = lineas;
   }
 }
 
-var operadores = "+, -, /, *, int, double, float, ;, :, public, static, void, &&, ||, <=, >=, <, >";
-const complejidadLimite = 11;
+const operadores = "+, -, /, *, int, double, float, ;, :, public, static, void, &&, ||, <=, >=, <, >";
+const complejidadLimite = 10;
 
 function mostrarMetricas()
 {
-var arrayLineasCodigo = document.getElementById("id-codigo").value.split('\n'); 
-analizarMetodos(arrayLineasCodigo);
+  var arrayLineasCodigo = document.getElementById("id-codigo").value.split('\n'); 
+  analizarMetodos(arrayLineasCodigo);
 }
 
 function complejidadCiclomatica(texto)
@@ -93,22 +94,22 @@ function generarLabelsSalida(texto,valor,div){
 }
 
 function fanIn(metodoAnalizado,metodos){
-var res = 0;
-var codigoRaw = document.getElementById("id-codigo").value;
-codigoRaw = codigoRaw.toLowerCase();
-for(const c of metodoAnalizado.arrayLineas){
-  for (const m of metodos) {
-    if(c.match(new RegExp(m.nombre.toLowerCase(),"g")))
-      res++;
+  var res = 0;
+  var codigoRaw = document.getElementById("id-codigo").value;
+  codigoRaw = codigoRaw.toLowerCase();
+  for(const c of metodoAnalizado.arrayLineas){
+    for (const m of metodos) {
+      if(c.match(new RegExp(m.nombre.toLowerCase(),"g")))
+        res++;
+    }
   }
-}
-return res;
+  return res;
 }
 
 function fanOut(functionName){
-var codigoRaw = document.getElementById("id-codigo").value;
-codigoRaw = codigoRaw.toLowerCase();
-return (codigoRaw.match(new RegExp(functionName.toLowerCase(),"g"))).length - 1;
+  var codigoRaw = document.getElementById("id-codigo").value;
+  codigoRaw = codigoRaw.toLowerCase();
+  return (codigoRaw.match(new RegExp(functionName.toLowerCase(),"g"))).length - 1;
 }
 
 function analizarMetodos(arrayLineasCodigo){
@@ -137,24 +138,30 @@ function analizarMetodos(arrayLineasCodigo){
               inicioMetodo = false;
               idxMet++;
           }
+          //Incrementa si es Linea en Blanco
+          if(line.match(/^(\\t|\s)*?$/) != null){
+            metodo.codigoBlanco++;
+          }
           metodo.codigoRaw += line + '\n';
       }
   }
   document.getElementById("id-resultado").style.display = "block";
 
   for (let index = 0; index < metodos.length; index++) {
-     var metodo = metodos[index];
+    var metodo = metodos[index];
      
-     metodo.fanIn = fanIn(metodo,metodos);
-     metodo.fanOut = fanOut(metodo.nombre);
+    metodo.fanIn = fanIn(metodo,metodos);
+    metodo.fanOut = fanOut(metodo.nombre);
      
-     var lineas_metodo = metodo.arrayLineas.length -1 ;
-      var lineas_comentarios_simples = metodo.codigoRaw.split('//').length - 1;
-      var lineas_de_codigo = parseInt(lineas_metodo - lineas_comentarios_simples);
-      var porcentaje_lineas_comentadas = (parseFloat((parseInt(lineas_comentarios_simples)/parseInt(lineas_metodo))*100).toFixed(2))+"%";
-      if(!isNaN(porcentaje_lineas_comentadas))
-            porcentaje_lineas_comentadas = 0+"%";
-      var complejidad_ciclomatica = complejidadCiclomatica(metodo.codigoRaw);
+    var lineas_metodo = metodo.arrayLineas.length -1 ;
+    var lineas_comentarios_simples = metodo.codigoRaw.split('//').length - 1;
+    var lineas_de_codigo = parseInt(lineas_metodo - lineas_comentarios_simples);
+    var porcentaje_lineas_comentadas = (parseFloat((parseInt(lineas_comentarios_simples)/parseInt(lineas_metodo))*100).toFixed(2))+"%";
+      
+    if(!isNaN(porcentaje_lineas_comentadas))
+      porcentaje_lineas_comentadas = 0+"%";
+    
+    var complejidad_ciclomatica = complejidadCiclomatica(metodo.codigoRaw);
     
       var halstead = halsteadMetodo(metodo.codigoRaw);
       var longitudHalstead = halstead[0];
@@ -167,25 +174,26 @@ function analizarMetodos(arrayLineasCodigo){
       gen_h5.textContent = "Metodo: " +  metodo.nombre;
       div.appendChild(gen_h5);
 
-      generarLabelsSalida("Lineas totales: ",lineas_metodo,div);
-      generarLabelsSalida("Lineas de codigo: ",lineas_de_codigo,div);
-      generarLabelsSalida("Lineas comentadas: ",lineas_comentarios_simples,div);
-      generarLabelsSalida("Porcentaje de lineas comentadas: ", porcentaje_lineas_comentadas,div);
-      generarLabelsSalida("Fan in: ",metodo.fanIn,div);
-      generarLabelsSalida("Fan out: ",metodo.fanOut,div);
+      generarLabelsSalida("Cantidad de Lineas totales: ",lineas_metodo,div);
+      generarLabelsSalida("Cantidad de Lineas de codigo: ",lineas_de_codigo,div);
+      generarLabelsSalida("Cantidad de Lineas comentadas: ",lineas_comentarios_simples,div);
+      generarLabelsSalida("Cantidad de Lineas en blanco: ", metodo.codigoBlanco, div);
+      generarLabelsSalida("Porcentaje de comentarios: ", porcentaje_lineas_comentadas,div);
       var div_mccabe = document.createElement("div");
       div_mccabe.id = "id-div-mccabe";
       generarLabelsSalida("Complejidad: " ,complejidad_ciclomatica,div_mccabe);
       div.appendChild(div_mccabe);
       var div_halstead = document.createElement("div");
       div_halstead.id = "id-div-halstead";
-      generarLabelsSalida("Operadores: ",operadores,div_halstead);
+      generarLabelsSalida("Fan in: ",metodo.fanIn,div);
+      generarLabelsSalida("Fan out: ",metodo.fanOut,div);
+      //generarLabelsSalida("Operadores: ",operadores,div_halstead);
       generarLabelsSalida("Longitud: ",longitudHalstead,div_halstead);
       generarLabelsSalida("Volumen: ",volumenHalstead,div_halstead);
       div.appendChild(div_halstead);
       var lblRecomendacion = document.createElement("label");
       lblRecomendacion.style.fontWeight = "bolder";
-      if(complejidad_ciclomatica<complejidadLimite){
+      if(complejidad_ciclomatica<=complejidadLimite){
         lblRecomendacion.textContent = "No es necesario modularizar el metodo";
         lblRecomendacion.style.color = "green";
       } 
