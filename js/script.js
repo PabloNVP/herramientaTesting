@@ -1,15 +1,16 @@
+
 class Metodo{
-  arrayLineas = [];
-  idxArrayLineas = 0;
-  complejidadCiclomatica = 0;
-  fanIn = 0;
-  fanOut= 0;
-  codigoRaw = "";
-  codigoBlanco=0;
-  constructor(nombre, lineas) {
-      this.nombre = nombre;
-      this.lineas = lineas;
-  }
+    arrayLineas = [];
+    idxArrayLineas = 0;
+    complejidadCiclomatica = 0;
+    fanIn = 0;
+    fanOut= 0;
+    codigoRaw = "";
+    codigoBlanco=0;
+    constructor(nombre, lineas) {
+        this.nombre = nombre;
+        this.lineas = lineas;
+    }
 }
 
 const operadores = "+, -, /, *, int, double, float, ;, :, public, static, void, &&, ||, <=, >=, <, >";
@@ -21,58 +22,60 @@ function mostrarMetricas()
   analizarMetodos(arrayLineasCodigo);
 }
 
-function complejidadCiclomatica(texto)
-{
-var c = 0;
-c+=texto.split('if').length - 1;
-/* c+=texto.split('else').length - 1; */
-c+=texto.split('for').length - 1;
-c+=texto.split('while').length - 1;
-c+=texto.split('||').length - 1;
-c+=texto.split('&&').length - 1;
-return c+1;
+function complejidadCiclomatica(texto){
+  let cc = 0;
+
+  cc+=texto.split('if').length - 1;
+  cc+=texto.split('for').length - 1;
+  cc+=texto.split('while').length - 1;
+  cc+=texto.split('||').length - 1;
+  cc+=texto.split('&&').length - 1;
+  cc+=texto.split('case').length - 1;
+  cc+=texto.split('try').length - 1;
+  
+  return cc+1;
 }
 
 function halsteadMetodo(texto)
 {
-//Operadores + - = * ; int double float return
-var textosSinComentarios = texto.replace(/(\/\*([\s\S]*?)\*\/)|(\/\/(.*)$)/gm, '');
-var cantidadOperadoresTotales = 0;
-var cantidadOperandosTotales = 0;
-var cantidadOperadoresUnicos = 0;
-var cantidadOperandosUnicos = 0;
-//var operadores = ["+", "-", "/", "*", "int", "double", "float", ";", ":", "public", "static", "void", "&&", "||", "<=", ">=", "<", ">"];
-var operadoresArray = operadores.split(',');
-var operandosUnicos = [];
-var i;
-//OPERADORES UNICOS Y TOTALES.
-for (i = 0; i < operadores.length; i++) 
-{
-  if(textosSinComentarios.indexOf(operadoresArray[i]) !=-1)
-    cantidadOperadoresUnicos++;
-  cantidadOperadoresTotales += texto.split(operadoresArray[i]).length-1;
-}
-
-//OPERADORES TOTALES
-
-//OPERANDOS UNICOS Y TOTALES.
-var aAnalizar = textosSinComentarios.split(' ');
-var hasta = textosSinComentarios.split(' ').length;
-for (j = 0; j < hasta; j++) 
-{
-  //Si no es un operador y todavia no esta en el array de operandos unicos.
-  if(operadoresArray.indexOf(aAnalizar[j]) == -1 && operandosUnicos.indexOf(aAnalizar[j]) == -1)
+  //Operadores + - = * ; int double float return
+  var textosSinComentarios = texto.replace(/(\/\*([\s\S]*?)\*\/)|(\/\/(.*)$)/gm, '');
+  var cantidadOperadoresTotales = 0;
+  var cantidadOperandosTotales = 0;
+  var cantidadOperadoresUnicos = 0;
+  var cantidadOperandosUnicos = 0;
+  //var operadores = ["+", "-", "/", "*", "int", "double", "float", ";", ":", "public", "static", "void", "&&", "||", "<=", ">=", "<", ">"];
+  var operadoresArray = operadores.split(',');
+  var operandosUnicos = [];
+  var i;
+  //OPERADORES UNICOS Y TOTALES.
+  for (i = 0; i < operadores.length; i++) 
   {
-    operandosUnicos.push(aAnalizar[j]);
-    cantidadOperandosUnicos++;
+    if(textosSinComentarios.indexOf(operadoresArray[i]) !=-1)
+      cantidadOperadoresUnicos++;
+    cantidadOperadoresTotales += texto.split(operadoresArray[i]).length-1;
   }
-  //Si no es un operador.
-  if(operadoresArray.indexOf(aAnalizar[j]) == -1)
-    cantidadOperandosTotales++;
-}
-var longitudHalstead = parseInt(cantidadOperadoresUnicos*Math.log2(cantidadOperadoresUnicos)+cantidadOperandosUnicos*Math.log2(cantidadOperandosUnicos));
-var volumenHalstead  = parseFloat((cantidadOperadoresTotales+cantidadOperandosTotales)*Math.log2(cantidadOperadoresUnicos+cantidadOperandosUnicos)).toFixed(2);
-return [longitudHalstead, volumenHalstead];
+
+  //OPERADORES TOTALES
+
+  //OPERANDOS UNICOS Y TOTALES.
+  var aAnalizar = textosSinComentarios.split(' ');
+  var hasta = textosSinComentarios.split(' ').length;
+  for (j = 0; j < hasta; j++) 
+  {
+    //Si no es un operador y todavia no esta en el array de operandos unicos.
+    if(operadoresArray.indexOf(aAnalizar[j]) == -1 && operandosUnicos.indexOf(aAnalizar[j]) == -1)
+    {
+      operandosUnicos.push(aAnalizar[j]);
+      cantidadOperandosUnicos++;
+    }
+    //Si no es un operador.
+    if(operadoresArray.indexOf(aAnalizar[j]) == -1)
+      cantidadOperandosTotales++;
+  }
+  var longitudHalstead = parseInt(cantidadOperadoresUnicos*Math.log2(cantidadOperadoresUnicos)+cantidadOperandosUnicos*Math.log2(cantidadOperandosUnicos));
+  var volumenHalstead  = parseFloat((cantidadOperadoresTotales+cantidadOperandosTotales)*Math.log2(cantidadOperadoresUnicos+cantidadOperandosUnicos)).toFixed(2);
+  return [longitudHalstead, volumenHalstead];
 }
 
 function getNombreMetodo(line){
@@ -119,8 +122,8 @@ function analizarMetodos(arrayLineasCodigo){
   var llavesAbiertas = 0;
   for (let index = 0; index < arrayLineasCodigo.length; index++) {
       line = arrayLineasCodigo[index];
-      if(!inicioMetodo && line.match(/(public|private|protected) +(static)? +([A-z])+ +([A-z])+ *\({1}([A-z\[\], ])+ +[A-z]+ *\){1}/)){
-          console.log(line);
+      if(!inicioMetodo && line.match(/(public|private|protected) +(static)? +([A-z])+ +([A-z]*\()+(\)|.*\))/)){
+          //console.log(line);
           inicioMetodo = true;
           llavesAbiertas = 1;
           var metodoDescubierto= new Metodo();
@@ -145,6 +148,7 @@ function analizarMetodos(arrayLineasCodigo){
           metodo.codigoRaw += line + '\n';
       }
   }
+  
   document.getElementById("id-resultado").style.display = "block";
 
   for (let index = 0; index < metodos.length; index++) {
@@ -153,10 +157,10 @@ function analizarMetodos(arrayLineasCodigo){
     metodo.fanIn = fanIn(metodo,metodos);
     metodo.fanOut = fanOut(metodo.nombre);
      
-    var lineas_metodo = metodo.arrayLineas.length -1 ;
+    var lineas_metodo = metodo.arrayLineas.length - 1 ;
     var lineas_comentarios_simples = metodo.codigoRaw.split('//').length - 1;
-    var lineas_de_codigo = parseInt(lineas_metodo - lineas_comentarios_simples);
-    var porcentaje_lineas_comentadas = (parseFloat((parseInt(lineas_comentarios_simples)/parseInt(lineas_metodo))*100).toFixed(2))+"%";
+    var lineas_de_codigo = parseInt(lineas_metodo - lineas_comentarios_simples - metodo.codigoBlanco);
+    var porcentaje_lineas_comentadas =(parseFloat((parseInt(lineas_comentarios_simples)/parseInt(lineas_metodo))*100).toFixed(2))+"%";
       
     if(!isNaN(porcentaje_lineas_comentadas))
       porcentaje_lineas_comentadas = 0+"%";
@@ -191,13 +195,14 @@ function analizarMetodos(arrayLineasCodigo){
       generarLabelsSalida("Longitud: ",longitudHalstead,div_halstead);
       generarLabelsSalida("Volumen: ",volumenHalstead,div_halstead);
       div.appendChild(div_halstead);
+      
       var lblRecomendacion = document.createElement("label");
       lblRecomendacion.style.fontWeight = "bolder";
+      
       if(complejidad_ciclomatica<=complejidadLimite){
         lblRecomendacion.textContent = "No es necesario modularizar el metodo";
         lblRecomendacion.style.color = "green";
-      } 
-      else {
+      } else {
         lblRecomendacion.textContent = "Se recomienda modularizar el metodo";
         lblRecomendacion.style.color = "red"
       }

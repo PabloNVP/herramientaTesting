@@ -4,8 +4,10 @@ nav{
 
 textarea 
 {
-	overflow-y:scroll;
+	overflow-y: scroll;
 	resize: none;
+	max-height: 400px;
+	max-width: 100%;
 }
 /* .tab {position:sticky;left:250px;} */
 .res_div{
