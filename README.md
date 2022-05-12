@@ -10,8 +10,8 @@ ANÁLISIS DEL MÉTODO “XXX” (UN REPORTE POR METODO)
 - [x] Cantidad de Líneas comentadas.
 - [x] Cantidad de Líneas en blanco.
 - [x] Porcentaje de comentarios : % (líneas comentadas / lineas de código) (aprox. 10%)
-- [ ] Complejidad . ciclomática : ( menor a 10)
-- [ ] Fan in : Cantidad de métodos que llaman a un método determinado
-- [ ] Fan out : Cantidad de métodos que llama un método determinado
-- [ ] Halstead - Longitud :
-- [ ] Halstead - Volumen :
+- [x] Complejidad . ciclomática : ( menor a 10)
+- [x] Fan in : Cantidad de métodos que llaman a un método determinado
+- [x] Fan out : Cantidad de métodos que llama un método determinado
+- [x] Halstead - Longitud :
+- [x] Halstead - Volumen :
