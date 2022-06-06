@@ -62,6 +62,7 @@ function deleteFile(){
     document.getElementById("id-analizar-codigo").style.display = "none";
     document.getElementById("id-drop-zone").style.display = "block";
     const myNode =  document.getElementById("id-resultado");
+    metodos = [];
     while (myNode.firstChild) {
       myNode.removeChild(myNode.lastChild);
     }
