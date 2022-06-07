@@ -15,6 +15,8 @@ class Metodo{
     }
 }
 
+var metodos = [];
+
 
 const complejidadLimite = 10;
 
@@ -84,18 +86,6 @@ function obtenerNombreMetodo(primerLinea){
   return primerLinea.replace(/[\t]*(public|private|protected) +(static)? +([A-z])+ +/, "").match(/.*[A-z]/)[0].replace(/(\(.*)/,"").trim();
 }
 
-function generarLabelsSalida(texto,valor,div){
-    var lab = document.createElement("label");
-    lab.textContent = texto;
-    lab.style.fontWeight = "bold";
-    lab.className = "col-md-3"
-    div.appendChild(lab);
-    var labDato = document.createElement("label");
-    labDato.textContent = valor;
-    div.appendChild(labDato);
-    div.appendChild(document.createElement("br"));
-}
-
 function fanOut(metodoAnalizado,metodos){
   var res = 0;
   var codigoRaw = document.getElementById("id-codigo").value;
@@ -111,12 +101,9 @@ function fanOut(metodoAnalizado,metodos){
 
 function fanIn(functionName){
   var codigoRaw = document.getElementById("id-codigo").value;
-  console.log(functionName.toLowerCase());
   codigoRaw = codigoRaw.toLowerCase();
   return (codigoRaw.match(new RegExp(functionName.toLowerCase(),"g"))).length - 1;
 }
-
-var metodos = [];
 
 function analizarMetodos(arrayLineasCodigo){
   var inicioMetodo = false;
@@ -159,67 +146,58 @@ function analizarMetodos(arrayLineasCodigo){
             metodo.codigoRaw += line + '\n';
       }
   }
-  
+
+  cargarDesplegable();
+
+  window.scrollTo(0, document.body.scrollHeight);
+}
+
+cargarDesplegable = () => {
   document.getElementById("id-resultado").style.display = "block";
 
-  for (let index = 0; index < metodos.length; index++) {
-    var metodo = metodos[index];
-     
-    metodo.fanIn = fanIn(metodo.nombre);
-    metodo.fanOut = fanOut(metodo,metodos);
-     
-    var lineas_metodo = metodo.arrayLineas.length - 1 ;
-    var lineas_comentarios_simples = metodo.codigoRaw.split('//').length - 1;
-    var lineas_de_codigo = parseInt(lineas_metodo - lineas_comentarios_simples - metodo.codigoBlanco);
-    var porcentaje_lineas_comentadas =(parseFloat((parseInt(lineas_comentarios_simples)/parseInt(lineas_metodo))*100).toFixed(2))+"%";
-      
-    if(!isNaN(porcentaje_lineas_comentadas))
-      porcentaje_lineas_comentadas = 0+"%";
-    
-    var complejidad_ciclomatica = complejidadCiclomatica(metodo.codigoRaw);
-    
-    var halstead = halsteadMetodo(metodo.codigoRaw);
-    var longitudHalstead = halstead[0];
-    var volumenHalstead = halstead[1];
+  const dropdown = document.getElementById('funciones');
 
-    var div = document.createElement("div");
-    div.id = "id-div-" + index;
-    var gen_h5 = document.createElement("h5");
-    gen_h5.textContent = "Nombre del Metodo: " + metodo.nombre;
-    div.appendChild(gen_h5);
+  let index = 0;
 
-    generarLabelsSalida("Cantidad de Lineas totales: ",lineas_metodo,div);
-    generarLabelsSalida("Cantidad de Lineas de codigo: ",lineas_de_codigo,div);
-    generarLabelsSalida("Cantidad de Lineas comentadas: ",lineas_comentarios_simples,div);
-    generarLabelsSalida("Cantidad de Lineas en blanco: ", metodo.codigoBlanco, div);
-    generarLabelsSalida("Porcentaje de comentarios: ", porcentaje_lineas_comentadas,div);
-    var div_mccabe = document.createElement("div");
-    div_mccabe.id = "id-div-mccabe";
-    generarLabelsSalida("Complejidad: " ,complejidad_ciclomatica,div_mccabe);
-    div.appendChild(div_mccabe);
-    var div_halstead = document.createElement("div");
-    div_halstead.id = "id-div-halstead";
-    generarLabelsSalida("Fan in: ",metodo.fanIn,div);
-    generarLabelsSalida("Fan out: ",metodo.fanOut,div);
-    //generarLabelsSalida("Operadores: ",operadores,div_halstead);
-    generarLabelsSalida("Longitud: ",longitudHalstead, div_halstead);
-    generarLabelsSalida("Volumen: ",volumenHalstead, div_halstead);
-    div.appendChild(div_halstead);
-    
-    var lblRecomendacion = document.createElement("label");
-    lblRecomendacion.style.fontWeight = "bolder";
-    
-    if(complejidad_ciclomatica<=complejidadLimite){
-      lblRecomendacion.textContent = "No es necesario modularizar el metodo.";
-      lblRecomendacion.style.color = "green";
-    } else {
-      lblRecomendacion.textContent = "Se recomienda modularizar el metodo.";
-      lblRecomendacion.style.color = "red"
-    }
-    div.appendChild(lblRecomendacion);
-    document.getElementById("id-resultado").appendChild(div);
-    div.className = "res_div"
-    div.setAttribute("align","center");
-    div.appendChild(document.createElement("br"));
+  for(let metodo of metodos){
+    let element = document.createElement('a');
+    element.innerHTML = metodo.nombre;
+    element.className = "dropdown-item";
+    element.value = index;
+    element.addEventListener('click', () => mostrarResultados(element.value), false);
+    index++;
+    dropdown.append(element);
   }
+}
+
+mostrarResultados = (index) => {
+  document.getElementById('metodo').style.display = "block";
+  
+  let metodo = metodos[index];
+     
+  let lineasTotales = (metodo.arrayLineas.length - 1);
+  let lineasComentadas = (metodo.codigoRaw.split('//').length - 1);
+  let lineasCodigo = parseInt(lineasTotales - lineasComentadas - metodo.codigoBlanco);
+  let porcComentadas = (parseFloat((parseInt(lineasComentadas)/parseInt(lineasTotales))*100).toFixed(2))+"%";
+  porcComentadas = (!isNaN(porcComentadas))? 0+"%" : porcComentadas;
+  let cc = complejidadCiclomatica(metodo.codigoRaw);
+  metodo.fanIn = fanIn(metodo.nombre);
+  metodo.fanOut = fanOut(metodo,metodos);
+  let halstead = halsteadMetodo(metodo.codigoRaw);
+  let recomendacion = (cc<=complejidadLimite)? "No es necesario modularizar el metodo." : "Se recomienda modularizar el metodo.";
+  
+  document.getElementById('metodo-nombre').innerHTML = "<b>Nombre del Metodo:</b> " + metodo.nombre;
+  document.getElementById('metodo-lineasTotales').innerHTML = "<b>Cantidad de lineas totales:</b> " + lineasTotales;
+  document.getElementById('metodo-lineasCodigo').innerHTML = "<b>Cantidad de lineas de codigo:</b> " + lineasCodigo;
+  document.getElementById('metodo-lineasComentadas').innerHTML = "<b>Cantidad de lineas comentadas:</b> " + lineasComentadas;
+  document.getElementById('metodo-lineasBlanco').innerHTML = "<b>Cantidad de lineas en blanco:</b> " + metodo.codigoBlanco;
+  document.getElementById('metodo-porcComentadas').innerHTML = "<b>Porcentaje de comentarios:</b> " + porcComentadas;
+  document.getElementById('metodo-complejidad').innerHTML = "<b>Complejidad Ciclomática:</b> " + cc;
+  document.getElementById('metodo-fanIn').innerHTML = "<b>Fan-In:</b> " + metodo.fanIn;
+  document.getElementById('metodo-fanOut').innerHTML = "<b>Fan-Out:</b> " + metodo.fanOut;
+  document.getElementById('metodo-longitud').innerHTML = "<b>Longitud:</b> " + halstead[0];;
+  document.getElementById('metodo-volumen').innerHTML = "<b>Volumen:</b> " +  halstead[1];
+  document.getElementById('metodo-recomendacion').innerHTML = "<b>" + recomendacion + "</b>";
+
+  window.scrollTo(0, document.body.scrollHeight);
 }

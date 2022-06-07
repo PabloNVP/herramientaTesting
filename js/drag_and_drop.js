@@ -61,9 +61,11 @@ function dropHandler(ev) {
 function deleteFile(){
     document.getElementById("id-analizar-codigo").style.display = "none";
     document.getElementById("id-drop-zone").style.display = "block";
-    const myNode =  document.getElementById("id-resultado");
+    document.getElementById('id-resultado').style.display = "none";
+    document.getElementById('metodo').style.display = "none";
+    const funciones =  document.getElementById("funciones");
     metodos = [];
-    while (myNode.firstChild) {
-      myNode.removeChild(myNode.lastChild);
+    while (funciones.firstChild) {
+      funciones.removeChild(funciones.lastChild);
     }
 }
