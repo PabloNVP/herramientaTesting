@@ -83,7 +83,8 @@ function halsteadMetodo(texto)
 }
 
 function obtenerNombreMetodo(primerLinea){
-  return primerLinea.replace(/[\t]*(public|private|protected) +(static)? +([A-z])+ +/, "").match(/.*[A-z]/)[0].replace(/(\(.*)/,"").trim();
+  //return primerLinea.replace(/[\t]*(public|private|protected) +(static)? +([A-z])+ +/, "").match(/.*[A-z]/)[0].replace(/(\(.*)/,"").trim();
+  return primerLinea.replace(/[\t|\s]+(public|private|protected)[\s]+(static)?[\s]?([A-z]+)[\s]+/, "").replace(/(\(.*)/,"").trim();
 }
 
 function fanOut(metodoAnalizado,metodos){
@@ -112,11 +113,17 @@ function analizarMetodos(arrayLineasCodigo){
 
   for (let index = 0; index < arrayLineasCodigo.length; index++) {
       line = arrayLineasCodigo[index];
-      if(!inicioMetodo && line.match(/(public|private|protected) +(static)? +([A-z])+ +([A-z].*\()+(\)|.*\))/)){
       
-          // Fix Inicio de Llave linea siguiente //
-          if(!line.match(/({){1}/))
-            index++;
+      //if(!inicioMetodo && line.match(/(public|private|protected) +(static)? +([A-z])+ +([A-z].*\()+(\)|.*\))/)){
+      if(!inicioMetodo && line.match(/(public|private|protected)[\s]+(static)?[\s]?([A-z]+)[\s]+([A-z]+)([\s]?|[\s]+)[(]([A-z|\s|,]+)?[)]/)){ 
+          
+        // Fix inicio de Llave linea siguiente //
+          let pos = index;
+          while(!arrayLineasCodigo[pos].match(/({){1}/)){
+            pos++;
+          }
+          
+          arrayLineasCodigo[pos] = arrayLineasCodigo[pos].replace(/({){1}/, '');
 
           inicioMetodo = true;
           llavesAbiertas = 1;
@@ -127,10 +134,13 @@ function analizarMetodos(arrayLineasCodigo){
           let metodo =  metodos[idxMet];
           metodo.arrayLineas[metodo.idxArrayLineas] += line;
           metodo.idxArrayLineas++;
-          if(line.match(/([{*])/))
-              llavesAbiertas++;
-          if(line.match(/([}*])/))
-              llavesAbiertas--;
+     
+          if(line.match(/([{*])/)){
+            llavesAbiertas+=line.match(/([{*])/g).length;
+          }
+          if(line.match(/([}*])/)){
+            llavesAbiertas-=line.match(/([}*])/g).length; 
+          }
           if(llavesAbiertas == 0){
               inicioMetodo = false;
               idxMet++;
@@ -184,7 +194,15 @@ mostrarResultados = (index) => {
   metodo.fanIn = fanIn(metodo.nombre);
   metodo.fanOut = fanOut(metodo,metodos);
   let halstead = halsteadMetodo(metodo.codigoRaw);
-  let recomendacion = (cc<=complejidadLimite)? "No es necesario modularizar el metodo." : "Se recomienda modularizar el metodo.";
+  let recomendacion = "";
+  
+  if(cc<=complejidadLimite){
+    recomendacion = "No es necesario modularizar el metodo.";
+    document.getElementById('metodo-recomendacion').style.color = "green";
+  }else{
+    recomendacion = "Se recomienda modularizar el metodo.";
+    document.getElementById('metodo-recomendacion').style.color = "red";
+  }
   
   document.getElementById('metodo-nombre').innerHTML = "<b>Nombre del Metodo:</b> " + metodo.nombre;
   document.getElementById('metodo-lineasTotales').innerHTML = "<b>Cantidad de lineas totales:</b> " + lineasTotales;
