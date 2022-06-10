@@ -27,7 +27,7 @@ function mostrarMetricas()
 }
 
 complejidadCiclomatica = (texto) => {
-  return(texto.match(/(if|for|while|\|\||&&|case|default|try)/gm) || []).length + 1;
+  return(texto.match(/(\b(if|for|while|case|default|try)\b|\B(\|\||&&)\B)/gm) || []).length + 1;
 }
 
 function halsteadMetodo(texto)
