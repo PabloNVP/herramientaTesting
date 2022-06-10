@@ -83,8 +83,7 @@ function halsteadMetodo(texto)
 }
 
 function obtenerNombreMetodo(primerLinea){
-  //return primerLinea.replace(/[\t]*(public|private|protected) +(static)? +([A-z])+ +/, "").match(/.*[A-z]/)[0].replace(/(\(.*)/,"").trim();
-  return primerLinea.replace(/[\t|\s]+(public|private|protected)[\s]+(static)?[\s]?([A-z]+)[\s]+/, "").replace(/(\(.*)/,"").trim();
+  return primerLinea.replace(/([\t|\s]+|[\t|\s]?)(public|private|protected)[\s]+(static)?[\s]?([A-z]+)[\s]+/, "").replace(/(\(.*)/,"").trim();
 }
 
 function fanOut(metodoAnalizado,metodos){
@@ -114,7 +113,6 @@ function analizarMetodos(arrayLineasCodigo){
   for (let index = 0; index < arrayLineasCodigo.length; index++) {
       line = arrayLineasCodigo[index];
       
-      //if(!inicioMetodo && line.match(/(public|private|protected) +(static)? +([A-z])+ +([A-z].*\()+(\)|.*\))/)){
       if(!inicioMetodo && line.match(/(public|private|protected)[\s]+(static)?[\s]?([A-z]+)[\s]+([A-z]+)([\s]?|[\s]+)[(]([A-z|\s|,]+)?[)]/)){ 
           
         // Fix inicio de Llave linea siguiente //
