@@ -17,7 +17,6 @@ class Metodo{
 
 var metodos = [];
 
-
 const complejidadLimite = 10;
 
 function mostrarMetricas()
@@ -27,7 +26,7 @@ function mostrarMetricas()
 }
 
 complejidadCiclomatica = (texto) => {
-  return(texto.match(/(\b(if|for|while|case|default|try)\b|\B(\|\||&&)\B)/gm) || []).length + 1;
+  return(texto.match(/(\b(if|for|while|case|try)\b|\B(\|\||&&)\B)/gm) || []).length + 1;
 }
 
 function halsteadMetodo(texto)
@@ -37,10 +36,16 @@ function halsteadMetodo(texto)
   var cantidadOperandosTotales = 0;
   var cantidadOperadoresUnicos = 0;
   var cantidadOperandosUnicos = 0;
-  var operadoresArray = ["int", "double", "float", "char", "Integer", "String", "Boolean", "Exception", "new",
+  var operadoresArray = ["int", "double", "float", "char", "Integer", "String", "Boolean", "Exception", "throw", "new",
             "if", "for", "while", "do", "switch", "case", "default", "try", "catch", "finally", "break", "continue",
             "+", "-", "/", "*", "%", "++", "--", ";", ":", "=", "(", "[", "{", "?", "return",
             "&&", "||", "==", "!=", "<=", ">=", "<", ">"];
+
+      
+  //let operadoresTest = new RegExp(/\b(int|double|float|char|Integer|String|Boolean|Exception|new|if|for|while|do|switch|case|default|try|catch|finally|break|continue|return|\?|\+|-|\/|\*)\b/, 'gm');
+  //[^\+][\+][^\+]
+  let testUnico = 0;
+  let testTotales = 0;
 
   // Calculo de n1 y N1 (Operadores) //
   for (let operador of operadoresArray) 
@@ -49,7 +54,12 @@ function halsteadMetodo(texto)
       cantidadOperadoresUnicos++;
       cantidadOperadoresTotales += texto.split(operador).length-1;
     }
+
+    //testUnico = textosSinComentarios.match(/\b)
   }
+
+  //console.log(cantidadOperadoresUnicos);
+  //console.log(cantidadOperadoresTotales);
 
   // Calculo de n2 y N2 (Operandos) //
   var textosSinOperadores = textosSinComentarios;
@@ -186,20 +196,29 @@ mostrarResultados = (index) => {
   let lineasTotales = (metodo.arrayLineas.length - 1);
   let lineasComentadas = (metodo.codigoRaw.split('//').length - 1);
   let lineasCodigo = parseInt(lineasTotales - lineasComentadas - metodo.codigoBlanco);
-  let porcComentadas = (parseFloat((parseInt(lineasComentadas)/parseInt(lineasTotales))*100).toFixed(2))+"%";
-  porcComentadas = (!isNaN(porcComentadas))? 0+"%" : porcComentadas;
+  let porcComentadas = (parseFloat((parseInt(lineasComentadas)/parseInt(lineasTotales))*100).toFixed(2));
+  porcComentadas = (isNaN(porcComentadas))? (0).toFixed(2) : porcComentadas;
   let cc = complejidadCiclomatica(metodo.codigoRaw);
   metodo.fanIn = fanIn(metodo.nombre);
   metodo.fanOut = fanOut(metodo,metodos);
   let halstead = halsteadMetodo(metodo.codigoRaw);
-  let recomendacion = "";
-  
+  let longitud = (isNaN(halstead[0]))? 0 : halstead[0];
+  let volumen = (isNaN(halstead[1]))? 0 : (halstead[1] == -Infinity) ? 0 : halstead[1];
+
   if(cc<=complejidadLimite){
-    recomendacion = "No es necesario modularizar el metodo.";
-    document.getElementById('metodo-recomendacion').style.color = "green";
+    document.getElementById('recomendacion-complejidad').innerHTML = "(No es necesario modularizar el metodo)";
+    document.getElementById('recomendacion-complejidad').style.color = "green";
   }else{
-    recomendacion = "Se recomienda modularizar el metodo.";
-    document.getElementById('metodo-recomendacion').style.color = "red";
+    document.getElementById('recomendacion-complejidad').innerHTML = "(Se recomienda modularizar el metodo)";
+    document.getElementById('recomendacion-complejidad').style.color = "red";
+  }
+
+  if(porcComentadas<10.00){
+    document.getElementById('recomendacion-porcComentadas').innerHTML = " (Se recomienda documentar el metodo)";
+    document.getElementById('recomendacion-porcComentadas').style.color = "red";
+  }else{
+    document.getElementById('recomendacion-porcComentadas').innerHTML = " (No es necesario documentar el metodo)";
+    document.getElementById('recomendacion-porcComentadas').style.color = "green";
   }
   
   document.getElementById('metodo-nombre').innerHTML = "<b>Nombre del Metodo:</b> " + metodo.nombre;
@@ -207,13 +226,12 @@ mostrarResultados = (index) => {
   document.getElementById('metodo-lineasCodigo').innerHTML = "<b>Cantidad de lineas de codigo:</b> " + lineasCodigo;
   document.getElementById('metodo-lineasComentadas').innerHTML = "<b>Cantidad de lineas comentadas:</b> " + lineasComentadas;
   document.getElementById('metodo-lineasBlanco').innerHTML = "<b>Cantidad de lineas en blanco:</b> " + metodo.codigoBlanco;
-  document.getElementById('metodo-porcComentadas').innerHTML = "<b>Porcentaje de comentarios:</b> " + porcComentadas;
+  document.getElementById('metodo-porcComentadas').innerHTML = "<b>Porcentaje de comentarios:</b> " + porcComentadas + "%";
   document.getElementById('metodo-complejidad').innerHTML = "<b>Complejidad Ciclomática:</b> " + cc;
   document.getElementById('metodo-fanIn').innerHTML = "<b>Fan-In:</b> " + metodo.fanIn;
   document.getElementById('metodo-fanOut').innerHTML = "<b>Fan-Out:</b> " + metodo.fanOut;
-  document.getElementById('metodo-longitud').innerHTML = "<b>Longitud:</b> " + halstead[0];;
-  document.getElementById('metodo-volumen').innerHTML = "<b>Volumen:</b> " +  halstead[1];
-  document.getElementById('metodo-recomendacion').innerHTML = "<b>" + recomendacion + "</b>";
+  document.getElementById('metodo-longitud').innerHTML = "<b>Longitud:</b> " + longitud;
+  document.getElementById('metodo-volumen').innerHTML = "<b>Volumen:</b> " + volumen;
 
   window.scrollTo(0, document.body.scrollHeight);
 }

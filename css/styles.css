@@ -35,3 +35,8 @@ textarea
 	font-family: Verdana, Geneva, Tahoma, sans-serif;
 	font-size: 12px;
 }
+
+label{
+	padding: 0;
+	margin: 0;
+}
